@@ -24,18 +24,17 @@ app.get('/', (req, res) => {
 })
 
 
-app.delete('/api/delete?id', async (req, res) => {
+app.delete('/api/delete/:id', async (req, res) => {
     try {
         await sql.connect(config)
-
-        let userId  = parseInt(req.params.id);
+        let userId = parseInt(req.params.id);
 
         await new sql.Request().query(
             `    
             delete from Registration where user_id=${userId};
 `
         );
-console.log("delete")
+        console.log("delete")
     }
     catch (err) {
         console.log(err)
@@ -45,6 +44,36 @@ console.log("delete")
     }
 
 });
+
+app.put("/api/update/:id", async (req, res) => {
+    try {
+        await sql.connect(config);
+        const userId = parseInt(req.params.id)
+        const { name,emails }=req.body;
+
+        console.log(name)
+        console.log(emails)
+        console.log(userId)
+
+        await new sql.Request().query(
+            `
+                update Registration set name='${name}' ,email='${emails}' where user_id='${userId}'
+            `
+        )
+        let result=await new sql.Request().query(
+            `
+                select * from registration
+            `)
+
+            console.log(result)
+    }
+    catch (err) {
+        console.log(err);
+    }
+    finally {
+        await sql.close();
+    }
+})
 
 app.post('/api/users', async (req, res) => {
     try {
@@ -69,7 +98,6 @@ app.post('/api/users', async (req, res) => {
     finally {
         await sql.close();
     }
-
 });
 
 app.listen(8080, () => {
